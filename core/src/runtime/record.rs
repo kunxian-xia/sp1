@@ -17,6 +17,7 @@ use crate::runtime::MemoryInitializeFinalizeEvent;
 use crate::runtime::MemoryRecordEnum;
 use crate::stark::MachineRecord;
 use crate::syscall::precompiles::blake3::Blake3CompressInnerEvent;
+use crate::syscall::precompiles::bn254_scalar::Bn254FieldArithEvent;
 use crate::syscall::precompiles::edwards::EdDecompressEvent;
 use crate::syscall::precompiles::keccak256::KeccakPermuteEvent;
 use crate::syscall::precompiles::sha256::{ShaCompressEvent, ShaExtendEvent};
@@ -84,6 +85,8 @@ pub struct ExecutionRecord {
 
     pub bn254_double_events: Vec<ECDoubleEvent>,
 
+    pub bn254_scalar_arith_events: Vec<Bn254FieldArithEvent>,
+
     pub k256_decompress_events: Vec<ECDecompressEvent>,
 
     pub blake3_compress_inner_events: Vec<Blake3CompressInnerEvent>,
@@ -123,6 +126,7 @@ pub struct ShardingConfig {
     pub bls12381_add_len: usize,
     pub bls12381_double_len: usize,
     pub uint256_mul_len: usize,
+    pub bn254_scalar_arith_len: usize,
 }
 
 impl ShardingConfig {
@@ -153,6 +157,7 @@ impl Default for ShardingConfig {
             bls12381_add_len: shard_size,
             bls12381_double_len: shard_size,
             uint256_mul_len: shard_size,
+            bn254_scalar_arith_len: shard_size,
         }
     }
 }
@@ -240,6 +245,11 @@ impl MachineRecord for ExecutionRecord {
             "bls12381_decompress_events".to_string(),
             self.bls12381_decompress_events.len(),
         );
+
+        stats.insert(
+            "bn254_scalar_arith_events".to_string(),
+            self.bn254_scalar_arith_events.len(),
+        );
         stats
     }
 
@@ -281,6 +291,8 @@ impl MachineRecord for ExecutionRecord {
             .append(&mut other.uint256_mul_events);
         self.bls12381_decompress_events
             .append(&mut other.bls12381_decompress_events);
+        self.bn254_scalar_arith_events
+            .append(&mut other.bn254_scalar_arith_events);
 
         // Merge the byte lookups.
         for (shard, events_map) in std::mem::take(&mut other.byte_lookups).into_iter() {
@@ -492,6 +504,15 @@ impl MachineRecord for ExecutionRecord {
             shard
                 .bls12381_double_events
                 .extend_from_slice(bls12381_double_chunk);
+        }
+
+        for (bn254_scalar_arith_chunk, shard) in take(&mut self.bn254_scalar_arith_events)
+            .chunks_mut(config.bn254_scalar_arith_len)
+            .zip(shards.iter_mut())
+        {
+            shard
+                .bn254_scalar_arith_events
+                .extend_from_slice(bn254_scalar_arith_chunk);
         }
 
         // Put the precompile events in the first shard.
