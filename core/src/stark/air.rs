@@ -189,3 +189,24 @@ impl<F: PrimeField32> core::hash::Hash for RiscvAir<F> {
         self.name().hash(state);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{air::MachineAir, stark::Chip};
+
+    use super::RiscvAir;
+    use p3_baby_bear::BabyBear;
+
+    #[test]
+    fn test_quotient_degree() {
+        let rv_air = RiscvAir::<BabyBear>::get_all();
+        for chip_air in rv_air {
+            let chip = Chip::new(chip_air);
+            println!(
+                "chip {}: log_quotient_degree = {}",
+                chip.name(),
+                chip.log_quotient_degree()
+            );
+        }
+    }
+}
