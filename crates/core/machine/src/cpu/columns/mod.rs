@@ -143,3 +143,13 @@ const fn make_col_map() -> CpuCols<usize> {
     let indices_arr = indices_arr::<NUM_CPU_COLS>();
     unsafe { transmute::<[usize; NUM_CPU_COLS], CpuCols<usize>>(indices_arr) }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::cpu::columns::NUM_CPU_COLS;
+
+    #[test]
+    fn print_out_metainfo() {
+        tracing::info!("#(cpu cols) = {}", NUM_CPU_COLS);
+    }
+}
