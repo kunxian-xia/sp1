@@ -143,3 +143,24 @@ const fn make_col_map() -> CpuCols<usize> {
     let indices_arr = indices_arr::<NUM_CPU_COLS>();
     unsafe { transmute::<[usize; NUM_CPU_COLS], CpuCols<usize>>(indices_arr) }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        cpu::columns::{
+            NUM_CPU_COLS, NUM_INSTRUCTION_COLS, NUM_OPCODE_SELECTOR_COLS, NUM_OPCODE_SPECIFIC_COLS,
+        },
+        memory::MemoryReadWriteCols,
+    };
+
+    #[test]
+    fn print_out_metainfo() {
+        env_logger::init();
+        log::info!("#(cpu cols) = {}", NUM_CPU_COLS);
+        log::info!("#(mem read cols) = {}", std::mem::size_of::<MemoryReadWriteCols<u8>>());
+        log::info!("#(opcode selectors) = {}", NUM_OPCODE_SELECTOR_COLS);
+        log::info!("#(instruction decoding) = {}", NUM_INSTRUCTION_COLS);
+        log::info!("#(opcode intermediates) = {}", NUM_OPCODE_SPECIFIC_COLS);
+        // 13 x 3 + 22 + 49
+    }
+}

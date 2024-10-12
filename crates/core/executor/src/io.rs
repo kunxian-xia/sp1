@@ -27,7 +27,8 @@ impl<'a> Executor<'a> {
 
     /// Write a slice of vecs to the standard input stream.
     pub fn write_vecs(&mut self, inputs: &[Vec<u8>]) {
-        for input in inputs {
+        for (i, input) in inputs.iter().enumerate() {
+            log::info!("write to input stream {} with {} bytes", i, input.len());
             self.state.input_stream.push(input.clone());
         }
     }

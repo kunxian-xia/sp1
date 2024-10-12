@@ -709,6 +709,9 @@ impl<'a> Executor<'a> {
 
         if self.print_report && !self.unconstrained {
             self.report.opcode_counts[instruction.opcode] += 1;
+            if instruction.is_i_type() && instruction.is_alu_instruction() {
+                self.report.alu_i_type_counts[instruction.opcode] += 1;
+            }
         }
 
         match instruction.opcode {
