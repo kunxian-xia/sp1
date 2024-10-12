@@ -9,6 +9,7 @@ use std::{
 use web_time::Instant;
 
 use crate::riscv::RiscvAir;
+use itertools::Itertools;
 use p3_challenger::CanObserve;
 use p3_maybe_rayon::prelude::*;
 use serde::{de::DeserializeOwned, Serialize};
@@ -28,8 +29,8 @@ use crate::{
 use sp1_core_executor::events::sorted_table_lines;
 
 use sp1_core_executor::{
-    subproof::NoOpSubproofVerifier, ExecutionError, ExecutionRecord, ExecutionReport, Executor,
-    Program, SP1Context,
+    subproof::NoOpSubproofVerifier, ExecutionError, ExecutionRecord, ExecutionReport,
+    ExecutionState, Executor, Program, SP1Context,
 };
 use sp1_stark::{
     air::{MachineAir, PublicValues},
@@ -213,6 +214,7 @@ where
             let handle = s.spawn(move || {
                 let _span = span.enter();
                 tracing::debug_span!("phase 1 trace generation").in_scope(|| {
+                    tracing::info!("shard batch size: {}", opts.shard_batch_size);
                     loop {
                         // Receive the latest checkpoint.
                         let received = { checkpoints_rx.lock().unwrap().recv() };
@@ -251,9 +253,24 @@ where
                             for record in records.iter_mut() {
                                 deferred.append(&mut record.defer());
                             }
-                            tracing::info!("deferred stats");
-                            tracing::info!("{:?}", deferred.stats());
+                            if done {
+                                tracing::info!("deferred stats for last shard");
+                                tracing::info!("{:?}", deferred.stats());
 
+                                let (addr_min, addr_max) = deferred
+                                    .memory_finalize_events
+                                    .iter()
+                                    .map(|event| event.addr)
+                                    .minmax()
+                                    .into_option()
+                                    .unwrap();
+
+                                tracing::info!(
+                                    "memory finalized events: addr_min = {}, addr_max = {}",
+                                    addr_min,
+                                    addr_max
+                                );
+                            }
                             // See if any deferred shards are ready to be commited to.
                             let mut deferred = deferred.split(done, opts.split_opts);
 
@@ -702,12 +719,15 @@ fn trace_checkpoint(
     opts: SP1CoreOpts,
 ) -> (Vec<ExecutionRecord>, ExecutionReport) {
     let mut reader = std::io::BufReader::new(file);
-    let state = bincode::deserialize_from(&mut reader).expect("failed to deserialize state");
+    let state: ExecutionState =
+        bincode::deserialize_from(&mut reader).expect("failed to deserialize state");
+    let global_clk_before = state.global_clk;
     let mut runtime = Executor::recover(program.clone(), state, opts);
     // We already passed the deferred proof verifier when creating checkpoints, so the proofs were
     // already verified. So here we use a noop verifier to not print any warnings.
     runtime.subproof_verifier = Arc::new(NoOpSubproofVerifier);
     let (events, _) = runtime.execute_record().unwrap();
+    tracing::info!("shard: global_clk ({} -> {})", global_clk_before, runtime.state.global_clk);
     (events, runtime.report)
 }
 
