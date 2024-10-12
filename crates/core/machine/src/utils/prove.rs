@@ -251,6 +251,8 @@ where
                             for record in records.iter_mut() {
                                 deferred.append(&mut record.defer());
                             }
+                            tracing::info!("deferred stats");
+                            tracing::info!("{:?}", deferred.stats());
 
                             // See if any deferred shards are ready to be commited to.
                             let mut deferred = deferred.split(done, opts.split_opts);
@@ -547,6 +549,10 @@ where
         tracing::info!("execution report (opcode counts):");
         for line in sorted_table_lines(report_aggregate.opcode_counts.as_ref()) {
             tracing::info!("  {line}");
+        }
+        tracing::info!("execution report (alu imm opcode counts):");
+        for line in sorted_table_lines(report_aggregate.alu_i_type_counts.as_ref()) {
+            tracing::info!(" {line}");
         }
         tracing::info!("execution report (syscall counts):");
         for line in sorted_table_lines(report_aggregate.syscall_counts.as_ref()) {
