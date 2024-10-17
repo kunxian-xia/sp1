@@ -265,6 +265,30 @@ where
                                     .into_option()
                                     .unwrap();
 
+                                let mut addrs = deferred
+                                    .memory_finalize_events
+                                    .iter()
+                                    .map(|event| event.addr)
+                                    .collect::<Vec<_>>();
+
+                                addrs.sort();
+                                addrs.iter().all(|addr| addr % 4 == 0);
+
+                                let gaps = addrs
+                                    .iter()
+                                    .zip(addrs.iter().skip(1))
+                                    .map(|(addr, addr_next)| *addr_next - *addr)
+                                    .collect::<Vec<u32>>();
+
+                                for gap in [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024] {
+                                    let within_counts = gaps.iter().filter(|g| **g <= gap).count();
+                                    tracing::info!(
+                                        "ratio of gap within {}: {}%",
+                                        gap,
+                                        100f64 * (within_counts as f64) / (addrs.len() as f64)
+                                    )
+                                }
+
                                 tracing::info!(
                                     "memory finalized events: addr_min = {}, addr_max = {}",
                                     addr_min,
