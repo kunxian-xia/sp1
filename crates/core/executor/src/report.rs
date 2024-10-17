@@ -13,6 +13,8 @@ use crate::{events::sorted_table_lines, syscalls::SyscallCode, Opcode};
 pub struct ExecutionReport {
     /// The opcode counts.
     pub opcode_counts: Box<EnumMap<Opcode, u64>>,
+    /// The i-type ALU opcode counts.
+    pub alu_i_type_counts: Box<EnumMap<Opcode, u64>>,
     /// The syscall counts.
     pub syscall_counts: Box<EnumMap<SyscallCode, u64>>,
     /// The cycle tracker counts.
@@ -49,6 +51,7 @@ where
 impl AddAssign for ExecutionReport {
     fn add_assign(&mut self, rhs: Self) {
         counts_add_assign(&mut self.opcode_counts, *rhs.opcode_counts);
+        counts_add_assign(&mut self.alu_i_type_counts, *rhs.alu_i_type_counts);
         counts_add_assign(&mut self.syscall_counts, *rhs.syscall_counts);
         self.touched_memory_addresses += rhs.touched_memory_addresses;
     }
