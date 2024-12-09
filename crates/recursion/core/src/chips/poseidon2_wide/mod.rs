@@ -187,9 +187,15 @@ pub(crate) mod tests {
         let config = SC::new();
         let machine_deg_9 = B::compress_machine(config);
         let (pk_9, vk_9) = machine_deg_9.setup(&program);
+        let p_start = std::time::Instant::now();
         let result_deg_9 = run_test_machine(vec![runtime.record], machine_deg_9, pk_9, vk_9);
         if let Err(e) = result_deg_9 {
             panic!("Verification failed: {:?}", e);
         }
+        tracing::info!(
+            "proof size: {}, proving time: {:?}",
+            bincode::serialized_size(&result_deg_9.unwrap()).unwrap(),
+            p_start.elapsed()
+        );
     }
 }
