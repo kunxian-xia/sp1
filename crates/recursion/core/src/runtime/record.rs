@@ -38,6 +38,7 @@ impl<F: PrimeField32> MachineRecord for ExecutionRecord<F> {
         stats.insert("base_alu_events".to_string(), self.base_alu_events.len());
         stats.insert("ext_alu_events".to_string(), self.ext_alu_events.len());
         stats.insert("mem_var_events".to_string(), self.mem_var_events.len());
+        stats.insert("mem_const_events".to_string(), self.mem_const_count);
 
         stats.insert("poseidon2_events".to_string(), self.poseidon2_events.len());
         stats.insert("exp_reverse_bits_events".to_string(), self.exp_reverse_bits_len_events.len());
