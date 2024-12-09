@@ -106,7 +106,9 @@ pub(crate) mod tests {
     use p3_symmetric::Permutation;
 
     use sp1_core_machine::utils::{run_test_machine, setup_logger};
-    use sp1_stark::{baby_bear_poseidon2::BabyBearPoseidon2, inner_perm, StarkGenericConfig};
+    use sp1_stark::{
+        baby_bear_poseidon2::BabyBearPoseidon2, inner_perm, MachineRecord, StarkGenericConfig,
+    };
     use zkhash::ark_ff::UniformRand;
 
     use super::WIDTH;
@@ -120,40 +122,43 @@ pub(crate) mod tests {
         type A = RecursionAir<F, 3>;
         type B = RecursionAir<F, 9>;
 
+        let n_poseidons = 1usize << 20;
         let input = [1; WIDTH];
-        let output = inner_perm()
-            .permute(input.map(BabyBear::from_canonical_u32))
-            .map(|x| BabyBear::as_canonical_u32(&x));
+        let mut state = input.map(BabyBear::from_canonical_u32);
+        for _ in 0..n_poseidons {
+            state = inner_perm().permute(state);
+        }
+        let output = state.map(|x| BabyBear::as_canonical_u32(&x));
 
-        let rng = &mut rand::thread_rng();
-        let input_1: [BabyBear; WIDTH] = std::array::from_fn(|_| BabyBear::rand(rng));
-        let output_1 = inner_perm().permute(input_1).map(|x| BabyBear::as_canonical_u32(&x));
-        let input_1 = input_1.map(|x| BabyBear::as_canonical_u32(&x));
+        // let rng = &mut rand::thread_rng();
+        // let input_1: [BabyBear; WIDTH] = std::array::from_fn(|_| BabyBear::rand(rng));
+        // let output_1 = inner_perm().permute(input_1).map(|x| BabyBear::as_canonical_u32(&x));
+        // let input_1 = input_1.map(|x| BabyBear::as_canonical_u32(&x));
 
-        let instructions =
-            (0..WIDTH)
-                .map(|i| instr::mem(MemAccessKind::Write, 1, i as u32, input[i]))
-                .chain(once(instr::poseidon2(
+        let instructions = (0..WIDTH)
+            .map(|i| instr::mem(MemAccessKind::Write, 1, i as u32, input[i]))
+            .chain((0..n_poseidons).into_iter().map(|j| {
+                instr::poseidon2(
                     [1; WIDTH],
-                    std::array::from_fn(|i| (i + WIDTH) as u32),
-                    std::array::from_fn(|i| i as u32),
-                )))
-                .chain(
-                    (0..WIDTH)
-                        .map(|i| instr::mem(MemAccessKind::Read, 1, (i + WIDTH) as u32, output[i])),
+                    std::array::from_fn(|i| (i + (j + 1) * WIDTH) as u32),
+                    std::array::from_fn(|i| (i + j * WIDTH) as u32),
                 )
-                .chain((0..WIDTH).map(|i| {
-                    instr::mem(MemAccessKind::Write, 1, (2 * WIDTH + i) as u32, input_1[i])
-                }))
-                .chain(once(instr::poseidon2(
-                    [1; WIDTH],
-                    std::array::from_fn(|i| (i + 3 * WIDTH) as u32),
-                    std::array::from_fn(|i| (i + 2 * WIDTH) as u32),
-                )))
-                .chain((0..WIDTH).map(|i| {
-                    instr::mem(MemAccessKind::Read, 1, (i + 3 * WIDTH) as u32, output_1[i])
-                }))
-                .collect::<Vec<_>>();
+            }))
+            .chain((0..WIDTH).map(|i| {
+                instr::mem(MemAccessKind::Read, 1, (i + n_poseidons * WIDTH) as u32, output[i])
+            }))
+            // .chain((0..WIDTH).map(|i| {
+            //     instr::mem(MemAccessKind::Write, 1, (2 * WIDTH + i) as u32, input_1[i])
+            // }))
+            // .chain(once(instr::poseidon2(
+            //     [1; WIDTH],
+            //     std::array::from_fn(|i| (i + 3 * WIDTH) as u32),
+            //     std::array::from_fn(|i| (i + 2 * WIDTH) as u32),
+            // )))
+            // .chain((0..WIDTH).map(|i| {
+            //     instr::mem(MemAccessKind::Read, 1, (i + 3 * WIDTH) as u32, output_1[i])
+            // }))
+            .collect::<Vec<_>>();
 
         let program = Arc::new(RecursionProgram { instructions, ..Default::default() });
         let mut runtime = Runtime::<F, EF, DiffusionMatrixBabyBear>::new(
@@ -162,21 +167,35 @@ pub(crate) mod tests {
         );
         runtime.run().unwrap();
 
+        tracing::info!("record: {:?}", runtime.record.stats());
+
         let config = SC::new();
         let machine_deg_3 = A::compress_machine(config);
         let (pk_3, vk_3) = machine_deg_3.setup(&program);
+        let p_start = std::time::Instant::now();
         let result_deg_3 =
             run_test_machine(vec![runtime.record.clone()], machine_deg_3, pk_3, vk_3);
         if let Err(e) = result_deg_3 {
             panic!("Verification failed: {:?}", e);
         }
+        tracing::info!(
+            "proof size: {}, proving time: {:?}",
+            bincode::serialized_size(&result_deg_3.unwrap()).unwrap(),
+            p_start.elapsed()
+        );
 
         let config = SC::new();
         let machine_deg_9 = B::compress_machine(config);
         let (pk_9, vk_9) = machine_deg_9.setup(&program);
+        let p_start = std::time::Instant::now();
         let result_deg_9 = run_test_machine(vec![runtime.record], machine_deg_9, pk_9, vk_9);
         if let Err(e) = result_deg_9 {
             panic!("Verification failed: {:?}", e);
         }
+        tracing::info!(
+            "proof size: {}, proving time: {:?}",
+            bincode::serialized_size(&result_deg_9.unwrap()).unwrap(),
+            p_start.elapsed()
+        );
     }
 }
