@@ -66,6 +66,7 @@ pub fn run_test_recursion(
     if test_config == TestConfig::All || test_config == TestConfig::SkinnyDeg7 {
         let machine = RecursionAirWideDeg9::machine(BabyBearPoseidon2::compressed());
         let (pk, vk) = machine.setup(&program);
+        tracing::info!("setup for SkinnyDeg7 finished");
         let result = run_test_machine(records.clone(), machine, pk, vk);
         if let Err(e) = result {
             panic!("Verification failed: {:?}", e);
@@ -75,6 +76,7 @@ pub fn run_test_recursion(
     if test_config == TestConfig::All || test_config == TestConfig::WideDeg17Wrap {
         let machine = RecursionAirWideDeg9::wrap_machine(BabyBearPoseidon2::compressed());
         let (pk, vk) = machine.setup(&program);
+        tracing::info!("setup for WideDeg17Wrap finished");
         let result = run_test_machine(records.clone(), machine, pk, vk);
         if let Err(e) = result {
             panic!("Verification failed: {:?}", e);

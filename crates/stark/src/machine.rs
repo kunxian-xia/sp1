@@ -164,7 +164,7 @@ impl<SC: StarkGenericConfig, A: MachineAir<Val<SC>>> StarkMachine<SC, A> {
                     let chip_name = chip.name();
                     let begin = Instant::now();
                     let prep_trace = chip.generate_preprocessed_trace(program);
-                    tracing::debug!(
+                    tracing::info!(
                         parent: &parent_span,
                         "generated preprocessed trace for chip {} in {:?}",
                         chip_name,

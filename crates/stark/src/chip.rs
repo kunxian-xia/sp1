@@ -80,7 +80,7 @@ where
             "chip {}: main={}, preprocessed={}, perm={}, quotient={}",
             ret.name(),
             ret.width(),
-            ret.preprocessed_width(),
+            ret.preprocessed_width()*4,
             ret.permutation_width(),
             ret.quotient_width(),
         );
