@@ -401,8 +401,14 @@ pub(crate) mod tests {
         )
         .unwrap();
         println!("proof size: {}", bincode::serialized_size(&proof).unwrap());
+        println!("#(shard proof): {}", proof.shard_proofs.len());
         let proofs = proof.shard_proofs;
         println!("Proof generated successfully");
+
+        let shard_1_proof = &proof.shard_proofs[0];
+        println!("===== shard 0 ======");
+        println!("chip_ordering: {:?}", shard_1_proof.chip_ordering);
+        println!("chip_ordering: num chip opened values = {}", shard_1_proof.opened_values.chips.len());
 
         challenger_val.observe(vk.commit);
 
