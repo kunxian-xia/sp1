@@ -405,7 +405,7 @@ pub(crate) mod tests {
         let proofs = proof.shard_proofs;
         println!("Proof generated successfully");
 
-        let shard_1_proof = &proof.shard_proofs[0];
+        let shard_1_proof = &proofs[0];
         println!("===== shard 0 ======");
         println!("chip_ordering: {:?}", shard_1_proof.chip_ordering);
         println!("chip_ordering: num chip opened values = {}", shard_1_proof.opened_values.chips.len());
