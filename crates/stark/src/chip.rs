@@ -66,14 +66,6 @@ where
         air.eval(&mut builder);
         let (sends, receives) = builder.interactions();
 
-        let nb_byte_sends = sends.iter().filter(|s| s.kind == InteractionKind::Byte).count();
-        let nb_byte_receives = receives.iter().filter(|r| r.kind == InteractionKind::Byte).count();
-        tracing::debug!(
-            "chip {} has {} byte interactions",
-            air.name(),
-            nb_byte_sends + nb_byte_receives
-        );
-
         let mut max_constraint_degree =
             get_max_constraint_degree(&air, air.preprocessed_width(), PROOF_MAX_NUM_PVS);
 
@@ -82,7 +74,18 @@ where
         }
         let log_quotient_degree = log2_ceil_usize(max_constraint_degree - 1);
 
-        Self { air, sends, receives, log_quotient_degree }
+        let ret = Self { air, sends, receives, log_quotient_degree };
+
+        tracing::info!(
+            "chip {}: main={}, preprocessed={}, perm={}, quotient={}",
+            ret.name(),
+            ret.width(),
+            ret.preprocessed_width(),
+            ret.permutation_width(),
+            ret.quotient_width(),
+        );
+
+        ret
     }
 
     /// Returns the number of interactions in the chip.

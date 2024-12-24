@@ -250,17 +250,17 @@ where
     }
 
     pub fn print_stats(&self) {
-        tracing::debug!("Total Cycles: {}", self.timestamp);
-        tracing::debug!("Poseidon Operations: {}", self.nb_poseidons);
-        tracing::debug!("Poseidon Permute Operations: {}", self.nb_poseidon_permutes);
-        tracing::debug!("Exp Reverse Bits Len Operations: {}", self.nb_erb_lens);
-        tracing::debug!("FRI Fold Operations: {}", self.nb_fri_folds);
-        tracing::debug!("Field Operations: {}", self.nb_base_ops);
-        tracing::debug!("Extension Operations: {}", self.nb_ext_ops);
-        tracing::debug!("Memory Operations: {}", self.nb_memory_ops);
-        tracing::debug!("Branch Operations: {}", self.nb_branch_ops);
+        tracing::info!("Total Cycles: {}", self.timestamp);
+        tracing::info!("Poseidon Operations: {}", self.nb_poseidons);
+        tracing::info!("Poseidon Permute Operations: {}", self.nb_poseidon_permutes);
+        tracing::info!("Exp Reverse Bits Len Operations: {}", self.nb_erb_lens);
+        tracing::info!("FRI Fold Operations: {}", self.nb_fri_folds);
+        tracing::info!("Field Operations: {}", self.nb_base_ops);
+        tracing::info!("Extension Operations: {}", self.nb_ext_ops);
+        tracing::info!("Memory Operations: {}", self.nb_memory_ops);
+        tracing::info!("Branch Operations: {}", self.nb_branch_ops);
         for (name, entry) in self.cycle_tracker.iter().sorted_by_key(|(name, _)| *name) {
-            tracing::debug!("> {}: {}", name, entry.cumulative_cycles);
+            tracing::info!("> {}: {}", name, entry.cumulative_cycles);
         }
     }
 

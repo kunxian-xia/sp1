@@ -39,6 +39,7 @@ pub fn run_test_recursion(
 
     match runtime.run() {
         Ok(_) => {
+            runtime.print_stats();
             println!(
                 "The program executed successfully, number of cycles: {}",
                 runtime.clk.as_canonical_u32() / 4
@@ -55,6 +56,7 @@ pub fn run_test_recursion(
     if test_config == TestConfig::All || test_config == TestConfig::WideDeg3 {
         let machine = RecursionAirWideDeg3::machine(BabyBearPoseidon2::default());
         let (pk, vk) = machine.setup(&program);
+        tracing::info!("setup for WideDeg3 finished");
         let result = run_test_machine(records.clone(), machine, pk, vk);
         if let Err(e) = result {
             panic!("Verification failed: {:?}", e);
