@@ -408,7 +408,13 @@ pub(crate) mod tests {
         proofs.iter().enumerate().for_each(|(i, shard_proof)| {
             println!("===== shard {} ======", i);
             println!("chip_ordering: {:?}", shard_proof.chip_ordering);
-            println!("chip_ordering: num chip opened values = {}", shard_proof.opened_values.chips.len());
+            for (chip, idx) in shard_proof.chip_ordering {
+                let opened_values = &shard_proof.opened_values.chips[idx];
+                println!("chip {} opened to {} main matrix", chip, opened_values.main.len());
+                println!("chip {} opened to {} preprocessed matrix", chip, opened_values.preprocessed.len());
+                println!("chip {} opened to {} perm matrix", chip, opened_values.permutation.len());
+                println!("chip {} log_degree: {}", chip, opened_values.log_degree);
+            }
         });
 
         challenger_val.observe(vk.commit);
