@@ -388,6 +388,10 @@ pub(crate) mod tests {
 
         let machine = A::machine(SC::default());
         let (_, vk) = machine.setup(&Program::from(elf).unwrap());
+        println!("vk.chip_info: {:?}", vk.chip_information);
+        println!("vk.chip_ordering: {:?}", vk.chip_ordering);
+        println!("vk size: {}", bincode::serialized_size(&vk).unwrap());
+
         let mut challenger_val = machine.config().challenger();
         let (proof, _, _) = sp1_core_machine::utils::prove::<_, CpuProver<_, _>>(
             Program::from(elf).unwrap(),
@@ -396,6 +400,7 @@ pub(crate) mod tests {
             SP1CoreOpts::default(),
         )
         .unwrap();
+        println!("proof size: {}", bincode::serialized_size(&proof).unwrap());
         let proofs = proof.shard_proofs;
         println!("Proof generated successfully");
 

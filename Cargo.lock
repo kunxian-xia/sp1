@@ -6449,6 +6449,7 @@ dependencies = [
 name = "sp1-recursion-program"
 version = "2.0.0"
 dependencies = [
+ "bincode",
  "itertools 0.13.0",
  "p3-air",
  "p3-baby-bear",

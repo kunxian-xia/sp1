@@ -34,6 +34,7 @@ serde = { version = "1.0.204", features = ["derive"] }
 rand = "0.8.5"
 tracing = "0.1.40"
 stacker = "0.1"
+bincode = "1.3.3"
 
 [features]
 debug = ["sp1-core-machine/debug"]
