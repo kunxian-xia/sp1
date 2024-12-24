@@ -418,6 +418,15 @@ pub(crate) mod tests {
                     opened_values.preprocessed.local.len(),
                     opened_values.permutation.local.len(),
                 );
+                let fri_proof_size = bincode::serialized_size(&(shard_proof.opening_proof.fri_proof)).unwrap();
+                let opening_proof_size = bincode::serialized_size(&(shard_proof.opening_proof)).unwrap();
+                println!("shard {}: fri proof size: {}, total: {}, ratio: {:2}",
+                    i,
+                    fri_proof_size,
+                    opening_proof_size,
+                    fri_proof_size as f64 / opening_proof_size as f64,
+                );
+
             }
         });
 
