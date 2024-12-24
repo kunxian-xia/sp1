@@ -410,10 +410,14 @@ pub(crate) mod tests {
             println!("chip_ordering: {:?}", shard_proof.chip_ordering);
             for (chip, idx) in shard_proof.chip_ordering.iter() {
                 let opened_values = &shard_proof.opened_values.chips[*idx];
-                println!("chip {} opened to {} main matrix", chip, opened_values.main.local.len());
-                println!("chip {} opened to {} preprocessed matrix", chip, opened_values.preprocessed.local.len());
-                println!("chip {} opened to {} perm matrix", chip, opened_values.permutation.local.len());
-                println!("chip {} log_degree: {}", chip, opened_values.log_degree);
+                println!(
+                    "chip {}: log(degree) = {}, main width={}, preprocessed width={}, perm width={}",
+                    chip,
+                    opened_values.log_degree,
+                    opened_values.main.local.len(),
+                    opened_values.preprocessed.local.len(),
+                    opened_values.permutation.local.len(),
+                );
             }
         });
 
