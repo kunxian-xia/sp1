@@ -408,8 +408,8 @@ pub(crate) mod tests {
         proofs.iter().enumerate().for_each(|(i, shard_proof)| {
             println!("===== shard {} ======", i);
             println!("chip_ordering: {:?}", shard_proof.chip_ordering);
-            for (chip, idx) in shard_proof.chip_ordering {
-                let opened_values = &shard_proof.opened_values.chips[idx];
+            for (chip, idx) in shard_proof.chip_ordering.iter() {
+                let opened_values = &shard_proof.opened_values.chips[*idx];
                 println!("chip {} opened to {} main matrix", chip, opened_values.main.local.len());
                 println!("chip {} opened to {} preprocessed matrix", chip, opened_values.preprocessed.local.len());
                 println!("chip {} opened to {} perm matrix", chip, opened_values.permutation.local.len());
