@@ -43,7 +43,8 @@ pub fn main() {
     let (pk, vk) = prover.setup(elf);
 
     tracing::info!("prove core");
-    let stdin = SP1Stdin::new();
+    let mut stdin = SP1Stdin::new();
+    stdin.write(&(1u32 << 20));
     let core_proof = prover.prove_core(&pk, &stdin, opts, context).unwrap();
 
     tracing::info!("Compress");

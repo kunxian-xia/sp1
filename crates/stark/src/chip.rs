@@ -77,12 +77,13 @@ where
         let ret = Self { air, sends, receives, log_quotient_degree };
 
         tracing::info!(
-            "chip {}: main={}, preprocessed={}, perm={}, quotient={}",
+            "chip {}: main={}, preprocessed={}, perm={}, quotient={}, log_quotient_degree={}",
             ret.name(),
             ret.width(),
-            ret.preprocessed_width()*4,
+            ret.preprocessed_width(),
             ret.permutation_width(),
             ret.quotient_width(),
+            ret.log_quotient_degree(),
         );
 
         ret

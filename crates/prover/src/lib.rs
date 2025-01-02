@@ -132,11 +132,15 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
     pub fn new() -> Self {
         let prover = Self::uninitialized();
         // Initialize everything except wrap key which is a bit slow.
-        prover.recursion_program();
+        let recursion_program = prover.recursion_program();
         prover.deferred_program();
-        prover.compress_program();
-        prover.shrink_program();
-        prover.wrap_program();
+        let compress_program = prover.compress_program();
+        let shrink_program = prover.shrink_program();
+        let wrap_program = prover.wrap_program();
+
+        tracing::info!("recursion program size: {}", recursion_program.instructions.len());
+        tracing::info!("compress program size: {}", compress_program.instructions.len());
+        tracing::info!("shrink program size: {}", shrink_program.instructions.len());
         prover.recursion_keys();
         prover.deferred_keys();
         prover.compress_keys();
@@ -147,15 +151,19 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
     /// Creates a new [SP1Prover] with lazily initialized components.
     pub fn uninitialized() -> Self {
         // Initialize the provers.
+        tracing::info!("========== core machine ==============");
         let core_machine = RiscvAir::machine(CoreSC::default());
         let core_prover = C::CoreProver::new(core_machine);
 
+        tracing::info!("========== compress machine ==============");
         let compress_machine = CompressAir::machine(InnerSC::default());
         let compress_prover = C::CompressProver::new(compress_machine);
 
+        tracing::info!("========== shrink machine ==============");
         let shrink_machine = ShrinkAir::wrap_machine_dyn(InnerSC::compressed());
         let shrink_prover = C::ShrinkProver::new(shrink_machine);
 
+        tracing::info!("========== wrap machine ==============");
         let wrap_machine = WrapAir::wrap_machine(OuterSC::default());
         let wrap_prover = C::WrapProver::new(wrap_machine);
 
@@ -449,11 +457,13 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                         let received = { input_rx.lock().unwrap().recv() };
                         if let Ok((index, height, input)) = received {
                             // Get the program and witness stream.
+                            let mut input_type_str= "";
                             let (program, witness_stream, program_type) = tracing::debug_span!(
                                 "write witness stream"
                             )
                             .in_scope(|| match input {
                                 SP1CompressMemoryLayouts::Core(input) => {
+                                    input_type_str = "Core";
                                     let mut witness_stream = Vec::new();
                                     witness_stream.extend(input.write());
                                     (
@@ -463,6 +473,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                     )
                                 }
                                 SP1CompressMemoryLayouts::Deferred(input) => {
+                                    input_type_str = "Deferred";
                                     let mut witness_stream = Vec::new();
                                     witness_stream.extend(input.write());
                                     (
@@ -472,6 +483,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                     )
                                 }
                                 SP1CompressMemoryLayouts::Compress(input) => {
+                                    input_type_str = "Compress";
                                     let mut witness_stream = Vec::new();
                                     witness_stream.extend(input.write());
                                     (
@@ -481,6 +493,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                     )
                                 }
                             });
+                            tracing::info!("========= recursion: layer {}, node {}, input type: {} =========", height, index, input_type_str);
 
                             // Execute the runtime.
                             let record = tracing::debug_span!("execute runtime").in_scope(|| {
@@ -496,6 +509,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                         SP1RecursionProverError::RuntimeError(e.to_string())
                                     })
                                     .unwrap();
+                                runtime.print_stats();
                                 runtime.record
                             });
 

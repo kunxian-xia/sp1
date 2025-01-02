@@ -62,8 +62,9 @@ pub trait MachineProver<SC: StarkGenericConfig, A: MachineAir<SC::Val>>:
                     let trace = chip.generate_trace(record, &mut A::Record::default());
                     tracing::debug!(
                         parent: &parent_span,
-                        "generated trace for chip {} in {:?}",
+                        "generated trace for chip {} with {} rows in {:?}",
                         chip_name,
+                        trace.height(),
                         begin.elapsed()
                     );
                     (chip_name, trace)
