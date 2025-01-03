@@ -274,11 +274,12 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
         vk.observe_into(&mut reconstruct_challenger);
 
         // Prepare the inputs for the recursion programs.
-        for batch in shard_proofs.chunks(batch_size) {
+        for (bi, batch) in shard_proofs.chunks(batch_size).enumerate() {
             let proofs = batch.to_vec();
 
             for (i, proof) in proofs.iter().enumerate() {
-                tracing::info!("{}th core proof size {}", i, bincode::serialized_size(proof).unwrap());
+                tracing::info!("{}th core proof in {}th batch: size={}", i, bi, bincode::serialized_size(proof).unwrap());
+                tracing::info!("{:?}", proof.chip_ordering.keys());
             }
             core_inputs.push(SP1RecursionMemoryLayout {
                 vk,
