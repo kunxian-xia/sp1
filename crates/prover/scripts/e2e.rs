@@ -42,7 +42,11 @@ pub fn main() {
     tracing::info!("setup elf");
     let (pk, vk) = prover.setup(elf);
 
-    tracing::info!("prove core");
+    tracing::info!(
+        "prove core with shard_size={}, batch_size={}",
+        opts.core_opts.shard_size,
+        opts.core_opts.shard_batch_size
+    );
     let mut stdin = SP1Stdin::new();
     stdin.write(&(1u32 << 20));
     let core_proof = prover.prove_core(&pk, &stdin, opts, context).unwrap();

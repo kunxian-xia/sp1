@@ -278,7 +278,12 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
             let proofs = batch.to_vec();
 
             for (i, proof) in proofs.iter().enumerate() {
-                tracing::info!("{}th core proof in {}th batch: size={}", i, bi, bincode::serialized_size(proof).unwrap());
+                tracing::info!(
+                    "{}th core proof in {}th batch: size={}",
+                    i,
+                    bi,
+                    bincode::serialized_size(proof).unwrap()
+                );
                 tracing::info!("{:?}", proof.chip_ordering.keys());
             }
             core_inputs.push(SP1RecursionMemoryLayout {
@@ -461,7 +466,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                         let received = { input_rx.lock().unwrap().recv() };
                         if let Ok((index, height, input)) = received {
                             // Get the program and witness stream.
-                            let mut input_type_str= "";
+                            let mut input_type_str = "";
                             let (program, witness_stream, program_type) = tracing::debug_span!(
                                 "write witness stream"
                             )
@@ -497,7 +502,12 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                     )
                                 }
                             });
-                            tracing::info!("========= recursion: layer {}, node {}, input type: {} =========", height, index, input_type_str);
+                            tracing::info!(
+                                "========= recursion: layer {}, node {}, input type: {} =========",
+                                height,
+                                index,
+                                input_type_str
+                            );
 
                             // Execute the runtime.
                             let record = tracing::debug_span!("execute runtime").in_scope(|| {
