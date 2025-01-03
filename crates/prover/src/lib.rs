@@ -215,6 +215,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
         } else {
             bincode::deserialize(include_bytes!("../dummy_vk_map.bin")).unwrap()
         };
+        tracing::info!("num(allowed_vk) = {}", allowed_vk_map.len());
 
         let (root, merkle_tree) = MerkleTree::commit(allowed_vk_map.keys().copied().collect());
 
