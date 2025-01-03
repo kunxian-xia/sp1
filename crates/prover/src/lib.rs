@@ -277,6 +277,9 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
         for batch in shard_proofs.chunks(batch_size) {
             let proofs = batch.to_vec();
 
+            for (i, proof) in proofs.iter().enumerate() {
+                tracing::info!("{}th core proof size {}", i, bincode::serialized_size(proof).unwrap());
+            }
             core_inputs.push(SP1RecursionMemoryLayout {
                 vk,
                 machine: self.core_prover.machine(),
