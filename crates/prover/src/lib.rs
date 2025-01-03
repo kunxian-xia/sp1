@@ -474,6 +474,15 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                 SP1CompressMemoryLayouts::Core(input) => {
                                     input_type_str = "Core";
                                     let mut witness_stream = Vec::new();
+                                    for proof in input.shard_proofs.iter() {
+                                        let pi: &RecursionPublicValues<_> =
+                                            proof.public_values.as_slice().borrow();
+                                        tracing::info!(
+                                            "shard {} -> {}",
+                                            pi.start_shard,
+                                            pi.next_shard
+                                        );
+                                    }
                                     witness_stream.extend(input.write());
                                     (
                                         self.recursion_program(),
@@ -493,6 +502,15 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                 }
                                 SP1CompressMemoryLayouts::Compress(input) => {
                                     input_type_str = "Compress";
+                                    for proof in input.shard_proofs.iter() {
+                                        let pi: &RecursionPublicValues<_> =
+                                            proof.public_values.as_slice().borrow();
+                                        tracing::info!(
+                                            "shard {} -> {}",
+                                            pi.start_shard,
+                                            pi.next_shard
+                                        );
+                                    }
                                     let mut witness_stream = Vec::new();
                                     witness_stream.extend(input.write());
                                     (
