@@ -249,16 +249,20 @@ where
         }
     }
 
+    pub(crate) fn ratio(&self, op_count: usize) -> f64 {
+        100f64 * (op_count as f64 / self.timestamp as f64)
+    }
+
     pub fn print_stats(&self) {
         tracing::info!("Total Cycles: {}", self.timestamp);
-        tracing::info!("Poseidon Operations: {}", self.nb_poseidons);
+        tracing::info!("Poseidon Operations: {} ({}%)", self.nb_poseidons, self.ratio(self.nb_poseidons));
         tracing::info!("Poseidon Permute Operations: {}", self.nb_poseidon_permutes);
         tracing::info!("Exp Reverse Bits Len Operations: {}", self.nb_erb_lens);
         tracing::info!("FRI Fold Operations: {}", self.nb_fri_folds);
-        tracing::info!("Field Operations: {}", self.nb_base_ops);
-        tracing::info!("Extension Operations: {}", self.nb_ext_ops);
-        tracing::info!("Memory Operations: {}", self.nb_memory_ops);
-        tracing::info!("Branch Operations: {}", self.nb_branch_ops);
+        tracing::info!("Field Operations: {} ({}%)", self.nb_base_ops, self.ratio(self.nb_base_ops));
+        tracing::info!("Extension Operations: {} ({}%)", self.nb_ext_ops, self.ratio(self.nb_ext_ops));
+        tracing::info!("Memory Operations: {} ({}%)", self.nb_memory_ops, self.ratio(self.nb_memory_ops));
+        tracing::info!("Branch Operations: {} ({}%)", self.nb_branch_ops, self.ratio(self.nb_branch_ops));
         for (name, entry) in self.cycle_tracker.iter().sorted_by_key(|(name, _)| *name) {
             tracing::info!("> {}: {}", name, entry.cumulative_cycles);
         }
