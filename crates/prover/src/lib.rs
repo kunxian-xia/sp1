@@ -484,7 +484,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                             pi.next_shard
                                         );
                                     }
-                                    input_size = bincode::serialized_size(&input).unwrap();
+                                    input_size = bincode::serialized_size(&input.shard_proofs).unwrap();
                                     witness_stream.extend(input.write());
                                     (
                                         self.recursion_program(),
@@ -513,7 +513,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                             pi.next_shard
                                         );
                                     }
-                                    input_size = bincode::serialized_size(&input).unwrap();
+                                    input_size = bincode::serialized_size(&input.shard_proofs).unwrap();
                                     let mut witness_stream = Vec::new();
                                     witness_stream.extend(input.write());
                                     (
