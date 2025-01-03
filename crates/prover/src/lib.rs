@@ -581,7 +581,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                 });
 
                                 // Commit to the record and traces.
-                                let data = tracing::debug_span!("commit")
+                                let data = tracing::info_span!("commit")
                                     .in_scope(|| self.compress_prover.commit(record, traces));
 
                                 // Observe the commitment.
@@ -593,7 +593,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                 });
 
                                 // Generate the proof.
-                                let proof = tracing::debug_span!("open").in_scope(|| {
+                                let proof = tracing::info_span!("open").in_scope(|| {
                                     self.compress_prover.open(pk, data, &mut challenger).unwrap()
                                 });
 
