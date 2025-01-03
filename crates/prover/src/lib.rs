@@ -467,6 +467,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                         if let Ok((index, height, input)) = received {
                             // Get the program and witness stream.
                             let mut input_type_str = "";
+                            let mut input_size = 0;
                             let (program, witness_stream, program_type) = tracing::debug_span!(
                                 "write witness stream"
                             )
@@ -483,6 +484,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                             pi.next_shard
                                         );
                                     }
+                                    input_size = bincode::serialized_size(&input).unwrap();
                                     witness_stream.extend(input.write());
                                     (
                                         self.recursion_program(),
@@ -511,6 +513,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                             pi.next_shard
                                         );
                                     }
+                                    input_size = bincode::serialized_size(&input).unwrap();
                                     let mut witness_stream = Vec::new();
                                     witness_stream.extend(input.write());
                                     (
@@ -521,10 +524,11 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                 }
                             });
                             tracing::info!(
-                                "========= recursion: layer {}, node {}, input type: {} =========",
+                                "========= recursion: layer {}, node {}, input type: {}, input_size: {} =========",
                                 height,
                                 index,
-                                input_type_str
+                                input_type_str,
+                                input_size,
                             );
 
                             // Execute the runtime.
