@@ -88,7 +88,18 @@ where
         }
         let log_quotient_degree = log2_ceil_usize(max_constraint_degree - 1);
 
-        Self { air, sends, receives, log_quotient_degree }
+        let ret = Self { air, sends, receives, log_quotient_degree };
+
+        tracing::info!(
+            "chip {}: main width={}, prep width={}, perm width={}, num_interactions={}, log_quotient_deg={}",
+            ret.air.name(),
+            ret.air.width(),
+            ret.air.preprocessed_width(),
+            ret.permutation_width(),
+            ret.num_interactions(),
+            ret.log_quotient_degree,
+        );
+        ret
     }
 
     /// Returns the number of interactions in the chip.

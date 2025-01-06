@@ -458,6 +458,14 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                             .in_scope(|| match input {
                                 SP1CircuitWitness::Core(input) => {
                                     let mut witness_stream = Vec::new();
+                                    tracing::info!(
+                                        "=========== node {} at layer {}: compress type={}, num_inputs = {}, input size={} ===========",
+                                        index,
+                                        height,
+                                        "Core",
+                                        input.shard_proofs.len(),
+                                        bincode::serialized_size(&input.shard_proofs).unwrap(),
+                                    );
                                     Witnessable::<InnerConfig>::write(&input, &mut witness_stream);
                                     (self.recursion_program(&input), witness_stream)
                                 }
@@ -468,6 +476,15 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                 }
                                 SP1CircuitWitness::Compress(input) => {
                                     let mut witness_stream = Vec::new();
+
+                                    tracing::info!(
+                                        "========== node {} at layer {}: compress type={}, num_inputs={}, input_size={} ============",
+                                        index,
+                                        height,
+                                        "Compress",
+                                        input.vks_and_proofs.len(),
+                                        bincode::serialized_size(&input.vks_and_proofs).unwrap(),
+                                    );
 
                                     let input_with_merkle = self.make_merkle_proofs(input);
 
@@ -482,6 +499,8 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                     )
                                 }
                             });
+                            tracing::info!("program.len() = {}", program.instructions.len());
+                            tracing::info!("program.shape() = {:?}", program.shape);
 
                             // Execute the runtime.
                             let record = tracing::debug_span!("execute runtime").in_scope(|| {
@@ -497,6 +516,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                         SP1RecursionProverError::RuntimeError(e.to_string())
                                     })
                                     .unwrap();
+                                runtime.print_stats();
                                 runtime.record
                             });
 
@@ -597,11 +617,11 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                 );
 
                                 // Commit to the record and traces.
-                                let data = tracing::debug_span!("commit")
+                                let data = tracing::info_span!("commit")
                                     .in_scope(|| self.compress_prover.commit(&record, traces));
 
                                 // Generate the proof.
-                                let proof = tracing::debug_span!("open").in_scope(|| {
+                                let proof = tracing::info_span!("open").in_scope(|| {
                                     self.compress_prover.open(&pk, data, &mut challenger).unwrap()
                                 });
 
@@ -1357,6 +1377,7 @@ pub mod tests {
 
         tracing::info!("prove core");
         let core_proof = prover.prove_core(&pk_d, program, &stdin, opts, context)?;
+        tracing::info!("num(shard proofs) = {}", core_proof.proof.0.len());
         let public_values = core_proof.public_values.clone();
 
         if env::var("COLLECT_SHAPES").is_ok() {

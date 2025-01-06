@@ -218,19 +218,19 @@ where
     }
 
     pub fn print_stats(&self) {
-        tracing::debug!("Total Cycles: {}", self.timestamp);
-        tracing::debug!("Poseidon Skinny Operations: {}", self.nb_poseidons);
-        tracing::debug!("Poseidon Wide Operations: {}", self.nb_wide_poseidons);
-        tracing::debug!("Exp Reverse Bits Operations: {}", self.nb_exp_reverse_bits);
-        tracing::debug!("FriFold Operations: {}", self.nb_fri_fold);
-        tracing::debug!("Field Operations: {}", self.nb_base_ops);
-        tracing::debug!("Select Operations: {}", self.nb_select);
-        tracing::debug!("Extension Operations: {}", self.nb_ext_ops);
-        tracing::debug!("BatchFRI Operations: {}", self.nb_batch_fri);
-        tracing::debug!("Memory Operations: {}", self.nb_memory_ops);
-        tracing::debug!("Branch Operations: {}", self.nb_branch_ops);
+        tracing::info!("Total Cycles: {}", self.timestamp);
+        tracing::info!("Poseidon Skinny Operations: {}", self.nb_poseidons);
+        tracing::info!("Poseidon Wide Operations: {}", self.nb_wide_poseidons);
+        tracing::info!("Exp Reverse Bits Operations: {}", self.nb_exp_reverse_bits);
+        tracing::info!("FriFold Operations: {}", self.nb_fri_fold);
+        tracing::info!("Field Operations: {}", self.nb_base_ops);
+        tracing::info!("Select Operations: {}", self.nb_select);
+        tracing::info!("Extension Operations: {}", self.nb_ext_ops);
+        tracing::info!("BatchFRI Operations: {}", self.nb_batch_fri);
+        tracing::info!("Memory Operations: {}", self.nb_memory_ops);
+        tracing::info!("Branch Operations: {}", self.nb_branch_ops);
         for (name, entry) in self.cycle_tracker.iter().sorted_by_key(|(name, _)| *name) {
-            tracing::debug!("> {}: {}", name, entry.cumulative_cycles);
+            tracing::info!("> {}: {}", name, entry.cumulative_cycles);
         }
     }
 
