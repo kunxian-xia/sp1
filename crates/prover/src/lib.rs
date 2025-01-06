@@ -174,16 +174,20 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
     /// Creates a new [SP1Prover] with lazily initialized components.
     pub fn uninitialized() -> Self {
         // Initialize the provers.
+        tracing::info!("================== Core Machine ====================");
         let core_machine = RiscvAir::machine(CoreSC::default());
         let core_prover = C::CoreProver::new(core_machine);
 
+        tracing::info!("================== Compress Machine =====================");
         let compress_machine = CompressAir::compress_machine(InnerSC::default());
         let compress_prover = C::CompressProver::new(compress_machine);
 
         // TODO: Put the correct shrink and wrap machines here.
+        tracing::info!("================== Shrink Machine =======================");
         let shrink_machine = ShrinkAir::shrink_machine(InnerSC::compressed());
         let shrink_prover = C::ShrinkProver::new(shrink_machine);
 
+        tracing::info!("================== Wrap Machine =========================");
         let wrap_machine = WrapAir::wrap_machine(OuterSC::default());
         let wrap_prover = C::WrapProver::new(wrap_machine);
 
