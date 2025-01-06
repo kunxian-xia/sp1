@@ -712,6 +712,13 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                         }
                         let received = { proofs_rx.lock().unwrap().recv() };
                         if let Ok((index, height, vk, proof)) = received {
+                            tracing::info!(
+                                "received node {} at layer {} (tree height={}): proof size ={}",
+                                index,
+                                height,
+                                expected_height,
+                                bincode::serialized_size(&proof).unwrap(),
+                            );
                             batch.push((index, height, vk, proof));
 
                             // If we haven't reached the batch size, continue.
