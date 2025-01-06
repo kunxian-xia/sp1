@@ -409,6 +409,7 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
         let num_first_layer_inputs = first_layer_inputs.len();
         let mut num_layer_inputs = num_first_layer_inputs;
         while num_layer_inputs > batch_size {
+            tracing::info!("layer {} has {} nodes", expected_height, num_layer_inputs);
             num_layer_inputs = num_layer_inputs.div_ceil(2);
             expected_height += 1;
         }
@@ -589,7 +590,8 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
             let proofs_tx = Arc::new(Mutex::new(proofs_tx));
             let proofs_rx = Arc::new(Mutex::new(proofs_rx));
             let mut prover_handles = Vec::new();
-            for _ in 0..opts.recursion_opts.shard_batch_size {
+            // for _ in 0..opts.recursion_opts.shard_batch_size {
+            for _ in 0..1 {
                 let prover_sync = Arc::clone(&proofs_sync);
                 let record_and_trace_rx = Arc::clone(&record_and_trace_rx);
                 let proofs_tx = Arc::clone(&proofs_tx);
@@ -629,6 +631,12 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
                                     self.compress_prover.open(&pk, data, &mut challenger).unwrap()
                                 });
 
+                                tracing::info!(
+                                    "node {} at layer {} reduce proof's size: {}",
+                                    index,
+                                    height,
+                                    bincode::serialized_size(&proof).unwrap()
+                                );
                                 // Verify the proof.
                                 #[cfg(feature = "debug")]
                                 self.compress_prover
