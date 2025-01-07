@@ -590,7 +590,10 @@ impl<C: SP1ProverComponents> SP1Prover<C> {
             let proofs_tx = Arc::new(Mutex::new(proofs_tx));
             let proofs_rx = Arc::new(Mutex::new(proofs_rx));
             let mut prover_handles = Vec::new();
-            for _ in 0..opts.recursion_opts.shard_batch_size {
+            let num_provers =
+                std::env::var("NUM_PROVERS").map_or(1, |s| s.parse().unwrap());
+            // for _ in 0..opts.recursion_opts.shard_batch_size {
+            for _ in 0..num_provers {
                 let prover_sync = Arc::clone(&proofs_sync);
                 let record_and_trace_rx = Arc::clone(&record_and_trace_rx);
                 let proofs_tx = Arc::clone(&proofs_tx);
