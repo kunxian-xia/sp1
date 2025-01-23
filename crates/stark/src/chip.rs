@@ -81,7 +81,7 @@ where
             ret.name(),
             ret.width(),
             ret.preprocessed_width(),
-            ret.permutation_width(),
+            ret.permutation_width() * 4,
             ret.quotient_width(),
             ret.log_quotient_degree(),
         );
