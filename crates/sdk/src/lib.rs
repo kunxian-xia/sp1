@@ -293,6 +293,7 @@ pub fn block_on<T>(fut: impl Future<Output = T>) -> T {
 #[cfg(test)]
 mod tests {
 
+    use crate::SP1Proof;
     use sp1_prover::init::SP1PublicValues;
 
     use crate::{utils, CostEstimator, ProverClient, SP1Stdin};
@@ -343,6 +344,30 @@ mod tests {
 
         // Generate proof & verify.
         let mut proof = client.prove(&pk, stdin).run().unwrap();
+
+        println!("fib core proof len: {}", bincode::serialized_size(&proof).unwrap());
+        match &proof.proof {
+            SP1Proof::Core(shard_proofs) => {
+                println!(
+                    "{} core shard proofs, size: {}",
+                    shard_proofs.len(),
+                    bincode::serialized_size(&shard_proofs).unwrap()
+                );
+                for (i, shard) in shard_proofs.iter().enumerate() {
+                    println!("------ shard {} ------", i);
+                    println!(
+                        "opened values size: {}",
+                        bincode::serialized_size(&shard.opened_values).unwrap()
+                    );
+                    println!(
+                        "opening proof size: {}",
+                        bincode::serialized_size(&shard.opening_proof).unwrap()
+                    );
+                    println!("----------------------");
+                }
+            }
+            _ => panic!("expected core proof"),
+        }
         client.verify(&proof, &vk).unwrap();
 
         // Test invalid public values.
