@@ -135,8 +135,10 @@ set_target_properties(sys-cuda PROPERTIES
     CUDA_RESOLVE_DEVICE_SYMBOLS ON
 )
 
-if(CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
-    # nothing needed
+if(CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 12.0)
+    target_link_libraries(sys-cuda PRIVATE
+        CUDA::cudart
+    )
 else()
     target_link_libraries(sys-cuda PRIVATE
         CUDA::cudart
