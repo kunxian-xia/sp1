@@ -18,6 +18,7 @@ sp1-build = { path = "../../../crates/build" }
 
 [features]
 default = []
+cuda = ["sp1-sdk/cuda"]
 
 [[bin]]
 name = "core_u64"

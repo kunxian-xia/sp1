@@ -27,7 +27,11 @@ fn load_input_from_cache(chain_id: u64, block_number: u64) -> ClientExecutorInpu
 async fn main() {
     sp1_sdk::utils::setup_logger();
 
-    let client_input = load_input_from_cache(CHAIN_ID_ETH_MAINNET, 21740164);
+    let block_number: u64 = std::env::var("BLOCK_NUMBER")
+        .expect("BLOCK_NUMBER env var must be set")
+        .parse()
+        .expect("BLOCK_NUMBER must be a valid u64");
+    let client_input = load_input_from_cache(CHAIN_ID_ETH_MAINNET, block_number);
     let mut stdin = SP1Stdin::default();
     let buffer = bincode::serialize(&client_input).unwrap();
     stdin.write_vec(buffer);
